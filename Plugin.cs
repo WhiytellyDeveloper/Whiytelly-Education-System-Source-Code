@@ -47,7 +47,8 @@ namespace WhiytellyEducationSystem
 
         public void ChangeFloorTest(string floorName, int floorNum, SceneObject scene)
         {
-            scene.GetCustomLevelObjects()[0].AddPotentialTeacher(CharacterLoader.whiytelly, 99999999);
+            foreach (var level in scene.GetCustomLevelObjects()) level.AddPotentialTeacher(CharacterLoader.whiytelly, 99999999);
+            
         }
     }
 

@@ -13,16 +13,16 @@ namespace WhiytellyEducationSystem.GameLoaders
 
              whiytelly = new NPCBuilder<Whiytelly>(plugin.Info)
             .SetName("Whiytelly").SetEnum("Whiytelly").SetMetaName("Whiytelly")
-            .AddLooker().SetMaxSightDistance(250).SetFOV(180)
+            .AddLooker().SetMaxSightDistance(250)
             .AddHeatmap().AddTrigger()
             .SetForcedSubtitleColor(new(70f/255f, 21f/255f, 142f/255f, 1f))
-            .SetMinMaxAudioDistance(50, 150)
+            .SetMinMaxAudioDistance(50, 180)
             .SetWanderEnterRooms()
             .SetPoster(whiyPosterTexture, "Whiytelly", "Test")
             .Build();
 
             whiytelly.gameObject.ConvertToPrefab(false);
-            whiytelly.PreInitialize();
+            whiytelly.PreInitialize(whiytelly);
             whiytelly.gameObject.ConvertToPrefab(true);
         }
 

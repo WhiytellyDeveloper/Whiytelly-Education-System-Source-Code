@@ -14,76 +14,83 @@ namespace WhiytellyEducationSystem.Characters
 {
     public class Whiytelly : Teacher
     {
-        public void PreInitialize()
+        public void PreInitialize(Whiytelly whiytelly)
         {
-            var helloSprites = AssetLoader.SpritesFromSpritesheet(4, 3, 40, Vector2.one / 2, AssetLoader.TextureFromMod(Plugin._instance, ["Characters", "Whiytelly", "Sprites", "Whiytelly_HelloSpriteSheet.png"]));
-            var countdownSprites = AssetLoader.SpritesFromSpritesheet(2, 1, 40, Vector2.one / 2, AssetLoader.TextureFromMod(Plugin._instance, ["Characters", "Whiytelly", "Sprites", "Whiytelly_CoutingSpriteSheet.png"]));
-            var walking1Sprites = AssetLoader.SpritesFromSpritesheet(4, 2, 40, Vector2.one / 2, AssetLoader.TextureFromMod(Plugin._instance, ["Characters", "Whiytelly", "Sprites", "Whiytelly_WalkingSpriteSheet0.png"]));
-            var walking2Sprites = AssetLoader.SpritesFromSpritesheet(4, 2, 40, Vector2.one / 2, AssetLoader.TextureFromMod(Plugin._instance, ["Characters", "Whiytelly", "Sprites", "Whiytelly_WalkingSpriteSheet1.png"]));
-            var walking3Sprites = AssetLoader.SpritesFromSpritesheet(4, 2, 40, Vector2.one / 2, AssetLoader.TextureFromMod(Plugin._instance, ["Characters", "Whiytelly", "Sprites", "Whiytelly_WalkingSpriteSheet2.png"]));
-            var knockSprites = AssetLoader.SpritesFromSpritesheet(4, 2, 40, Vector2.one / 2, AssetLoader.TextureFromMod(Plugin._instance, ["Characters", "Whiytelly", "Sprites", "Whiytelly_KnockSpriteSheet.png"]));
-            whiytellIndicatorSprites = AssetLoader.SpritesFromSpritesheet(3, 3, 40, Vector2.one / 2, AssetLoader.TextureFromMod(Plugin._instance, ["Characters", "Whiytelly", "Sprites", "WhiytellyIndicator.png"]));
+            AudioClip LoadSound(string name) => AssetLoader.AudioClipFromMod(Plugin._instance, ["Characters", "Whiytelly", "Audio", name]);
+            Sprite[] LoadSpritesheet(string file, int cols, int rows) => AssetLoader.SpritesFromSpritesheet(cols, rows, 40, Vector2.one / 2, AssetLoader.TextureFromMod(Plugin._instance, ["Characters", "Whiytelly", "Sprites", file]));
 
-            spriteRenderer[0].sprite = helloSprites[0];
-            spriteRenderer[0].transform.localPosition = Vector3.zero;
-            spriteBase.transform.localPosition = new(0f, -1.25f, 0f);
+            helloAnim = LoadSpritesheet("Whiytelly_HelloSpriteSheet.png", 4, 3);
+            countdownAnim = LoadSpritesheet("Whiytelly_CoutingSpriteSheet.png", 2, 1);
+            clappingAnim = LoadSpritesheet("Whiytelly_PraiseSpriteSheet.png", 2, 1);
+            whiytellIndicatorSprites = LoadSpritesheet("WhiytellyIndicator.png", 3, 3);
 
-            assetMan.AddRange(helloSprites);
-            assetMan.AddRange(countdownSprites);
+            var walkingSpritesheets = new[] { LoadSpritesheet("Whiytelly_WalkingSpriteSheet0.png", 4, 2), LoadSpritesheet("Whiytelly_WalkingSpriteSheet1.png", 4, 2), LoadSpritesheet("Whiytelly_WalkingSpriteSheet2.png", 4, 2) };
+            var knockSprites = LoadSpritesheet("Whiytelly_KnockSpriteSheet.png", 4, 2);
 
-            SpriteRotationMap walkMap1 = GenericExtensions.CreateRotationMap(8, walking1Sprites);
-            SpriteRotationMap walkMap2 = GenericExtensions.CreateRotationMap(8, walking2Sprites);
-            SpriteRotationMap walkMap3 = GenericExtensions.CreateRotationMap(8, walking3Sprites);
-            SpriteRotationMap knock = GenericExtensions.CreateRotationMap(8, knockSprites);
+            spriteRenderer[0].sprite = helloAnim[0];
+            spriteRenderer[0].transform.localPosition = new Vector3(0f, -1.25f, 0f);
+
+            var rotationMaps = walkingSpritesheets.Select(s => GenericExtensions.CreateRotationMap(8, s)).ToArray();
+            var knockMap = GenericExtensions.CreateRotationMap(8, knockSprites);
 
             animator = gameObject.AddComponent<KapoAnimator>();
-            animator.asr = spriteRenderer[0].CreateAnimatedSpriteRotator([walkMap1, walkMap2, walkMap3]);
-            animator.asr.targetSprite = walking1Sprites[0];
+            animator.asr = spriteRenderer[0].CreateAnimatedSpriteRotator(rotationMaps);
+            animator.asr.targetSprite = walkingSpritesheets[0][0];
 
-            placeholder = walking1Sprites[0];
-            placeholder2 = walking2Sprites[0];
-            placeholder3 = walking3Sprites[0];
-
-            audMan = GetComponent<AudioManager>();
+            placeholder = walkingSpritesheets[0][0];
+            placeholder2 = walkingSpritesheets[1][0];
+            placeholder3 = walkingSpritesheets[2][0];
 
             AssetLoader.LocalizationFromFile(Path.Combine([AssetLoader.GetModPath(Plugin._instance), "Characters", "Whiytelly", "Language", "Whiy_English.json"]), Language.English);
 
-            AudioClip LoadSound(string name) => AssetLoader.AudioClipFromMod(Plugin._instance, ["Characters", "Whiytelly", "Audio", name]);
+            audMan = GetComponent<AudioManager>();
 
             audHello = LoadSound("Whiytelly_HellowF1.wav").ConvertToSoundObject("Whiytelly_HellowF1_0", SoundType.Voice).AddTimedSubKey("Whiytelly_HellowF1_1", 3.594f);
             audStartCountdown = LoadSound("Whiytelly_StartCountdown.wav").ConvertToSoundObject("Whiytelly_CountdownStart", SoundType.Voice);
-            audCountdown[0] = LoadSound("Whiytelly_10.wav").ConvertToSoundObject("Whiytelly_10", SoundType.Voice);
-            audCountdown[1] = LoadSound("Whiytelly_9.wav").ConvertToSoundObject("Whiytelly_9", SoundType.Voice);
-            audCountdown[2] = LoadSound("Whiytelly_8.wav").ConvertToSoundObject("Whiytelly_8", SoundType.Voice);
-            audCountdown[3] = LoadSound("Whiytelly_7.wav").ConvertToSoundObject("Whiytelly_7", SoundType.Voice);
-            audCountdown[4] = LoadSound("Whiytelly_6.wav").ConvertToSoundObject("Whiytelly_6", SoundType.Voice);
-            audCountdown[5] = LoadSound("Whiytelly_5.wav").ConvertToSoundObject("Whiytelly_5", SoundType.Voice);
-            audCountdown[6] = LoadSound("Whiytelly_4.wav").ConvertToSoundObject("Whiytelly_4", SoundType.Voice);
-            audCountdown[7] = LoadSound("Whiytelly_3.wav").ConvertToSoundObject("Whiytelly_3", SoundType.Voice);
-            audCountdown[8] = LoadSound("Whiytelly_2.wav").ConvertToSoundObject("Whiytelly_2", SoundType.Voice);
-            audCountdown[9] = LoadSound("Whiytelly_1.wav").ConvertToSoundObject("Whiytelly_1", SoundType.Voice);
             audEndCountdown = LoadSound("Whiytelly_EndCountdown.wav").ConvertToSoundObject("Whiytelly_CountdownEnd_0", SoundType.Voice).AddTimedSubKey("Whiytelly_CountdownEnd_1", 2.580f);
+
+            for (int i = 0; i < 10; i++) audCountdown[i] = LoadSound($"Whiytelly_{10 - i}.wav").ConvertToSoundObject($"Whiytelly_{10 - i}", SoundType.Voice);
+            for (int i = 0; i < 4; i++) footsteps[i] = LoadSound($"Whiytelly_Footstep{i}.wav").ConvertToSoundObject("Whiytelly_Steps", SoundType.Effect);
+
+            loseSound = AssetLoader.AudioClipFromMod(Plugin._instance, ["Misc", "HellMensage.wav"]).ConvertToSoundObject("", SoundType.Effect);
+            loseSound.subtitle = false;
+
+            claps = LoadSound("Whiytelly_Aplause.wav").ConvertToSoundObject("Whiytelly_Applauding", SoundType.Effect);
         }
+
 
         public override void Initialize()
         {
             base.Initialize();
-            baseSpeed = 22;
+            baseSpeed = 13;
             animator.Initialize(spriteRenderer[0]);
-            animator.AddAnimation("Anim_WhiyHello", assetMan.GetAll<Sprite>().Take(11).ToArray(), [0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 3, 2, 1, 0, 6, 7, 8, 9, 10, 9, 10, 9, 10, 9, 10, 9, 8, 7, 6, 0], 0.15f);
-            animator.AddAnimation("Anim_CountingStart", assetMan.GetAll<Sprite>().Skip(11).Take(2).ToArray(), [1], 0f);
-            animator.AddAnimation("Anim_Counting", assetMan.GetAll<Sprite>().Skip(11).Take(2).ToArray(), [0], 0f);
+            animator.AddAnimation("Anim_WhiyHello", helloAnim, [0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 3, 2, 1, 0, 6, 7, 8, 9, 10, 9, 10, 9, 10, 9, 10, 9, 8, 7, 6, 0], 0.15f);
+            animator.AddAnimation("Anim_CountingStart", countdownAnim, [0], 0f);
+            animator.AddAnimation("Anim_Counting", countdownAnim, [1], 0f);
             animator.AddAnimation("Anim_Angry", [placeholder], [0], 0.15f, true);
             animator.AddAnimation("Anim_WalkAngry", [placeholder, placeholder2, placeholder3], [0, 1, 0, 2], 0.15f, true);
-            animator.AddAnimation("Anim_Knock", [placeholder4], [0], 0f, true);
+            animator.AddAnimation("Anim_Clapping", clappingAnim, [0, 1], 0.05f);
 
             whiytellyIndicator = CustomBaldicator.CreateBaldicator();
             whiytellyIndicator.transform.localPosition = new(320f, -320f, 0f);
-            whiytellyIndicator.ReflectionSetVariable("StartingPosition", new Vector2(0f, -125f));
-            whiytellyIndicator.SetHearingAnimation(new CustomAnimation<Sprite>(Enumerable.Repeat(whiytellIndicatorSprites.Take(4), 5).SelectMany(x => x).Take(19).Append(whiytellIndicatorSprites[0]).ToArray(), 0.65f));
+            whiytellyIndicator.ReflectionSetVariable("StartingPosition", new Vector2(0f, -130f));
+            whiytellyIndicator.SetHearingAnimation(new CustomAnimation<Sprite>(Enumerable.Repeat(whiytellIndicatorSprites.Take(4), 5).SelectMany(x => x).Take(19).Append(whiytellIndicatorSprites[0]).ToArray(), 0.55f));
             whiytellyIndicator.AddAnimation("Happy", new CustomAnimation<Sprite>([whiytellIndicatorSprites[5]], 1));
             whiytellyIndicator.AddAnimation("Sad", new CustomAnimation<Sprite>([whiytellIndicatorSprites[6]], 1));
+            whiytellyIndicator.AddAnimation("Neutral", new CustomAnimation<Sprite>([whiytellIndicatorSprites[8]], 1));
             whiytellyIndicator.AddAnimation("Distracted", new CustomAnimation<Sprite>([whiytellIndicatorSprites[7]], 1));
+
+            caughtOffset = -Vector3.one * 7.5f;
+            navigator.passableObstacles.Clear();
+            AddLoseSound(loseSound, 100);
+        }
+
+        public override WeightedTeacherNotebook GetTeacherNotebookWeight()
+        {
+            WeightedTeacherNotebook notebook = new WeightedTeacherNotebook(this);
+            notebook.Sprite(AssetLoader.SpritesFromSpritesheet(3, 4, 40, Vector2.one / 2, AssetLoader.TextureFromMod(Plugin._instance, ["Pickups", "WhiyNotebooks.png"])));
+            notebook.Weight(100);
+            return notebook;
         }
 
         public new void Hear(GameObject source, Vector3 position, int value, bool appear)
@@ -92,45 +99,33 @@ namespace WhiytellyEducationSystem.Characters
 
             if (appear)
             {
-                if (value >= currentSoundVal) whiytellyIndicator.ActivateBaldicator("Happy");
-                else if (value <= currentSoundVal) whiytellyIndicator.ActivateBaldicator("Sad");
+                if (value > currentSoundVal) whiytellyIndicator.ActivateBaldicator("Happy");
+                else if (value < currentSoundVal) whiytellyIndicator.ActivateBaldicator("Sad");
+                else if (value == currentSoundVal) whiytellyIndicator.ActivateBaldicator("Neutral");
             }
 
             UpdateSoundTarget();
             base.Hear(source, position, value, false);
         }
 
-        public void FacultyDoorHit(StandardDoor door, Cell otherSide)
+        public override void Slap()
         {
-            if (lastKnockedDoor != door) KnockOnDoor(door, otherSide);
-            else door.OpenTimedWithKey(door.DefaultTime, false);
+            base.Slap();
+
+            if (!audMan.AnyAudioIsPlaying)
+            audMan.PlayRandomAudio(footsteps);
             
-            lastKnockedDoor = door;
         }
 
-        public void KnockOnDoor(StandardDoor door, Cell otherSide)
+        public override void CaughtPlayer(PlayerManager player)
         {
-            door.Knock();
-            navigator.Entity.ExternalActivity.moveMods.Add(movMod);
-            StopAllCoroutines();
-            StartCoroutine(UnpauseAfterKnock(door, 4, otherSide));
+            navigator.SetSpeed(0);
+
+            if (Singleton<BaseGameManager>.Instance != null) Singleton<BaseGameManager>.Instance.EndGame(player.transform, this);
+            else Singleton<CoreGameManager>.Instance.EndGame(player.transform, this);
         }
 
-        public IEnumerator UnpauseAfterKnock(StandardDoor door, float time, Cell otherSide)
-        {
-            while (time > 0f)
-            {
-                time -= Time.deltaTime * TimeScale;
-                yield return null;
-            }
-            navigationStateMachine.ChangeState(new NavigationState_TargetPosition(this, -1, otherSide.FloorWorldPosition));
-            navigator.Entity.ExternalActivity.moveMods.Remove(movMod);
-
-            if (Vector3.Distance(transform.position, door.CenteredPosition) <= 5f)
-                door.OpenTimedWithKey(door.DefaultTime, false);
-            
-            yield break;
-        }
+        public bool FacingPlayer(PlayerManager player) => (double)Vector3.Angle(transform.forward, player.transform.position - transform.position) <= 22.5;
 
         public override TeacherState GetHappyState() => new Whiytelly_Initial(this);
         public override TeacherState GetAngryState() => new Whiytelly_Walking(this);
@@ -140,11 +135,13 @@ namespace WhiytellyEducationSystem.Characters
         public AudioManager audMan;
         public KapoAnimator animator;
         public Sprite placeholder, placeholder2, placeholder3, placeholder4;
+        public Sprite[] helloAnim, countdownAnim, clappingAnim;
         public SoundObject audHello, audStartCountdown, audEndCountdown;
         public SoundObject[] audCountdown = new SoundObject[10];
+        public SoundObject[] footsteps = new SoundObject[4];
+        public SoundObject loseSound, claps;
         public Sprite[] whiytellIndicatorSprites;
         public CustomBaldicator whiytellyIndicator;
-        public StandardDoor lastKnockedDoor;
         public MovementModifier movMod = new(Vector3.zero, 0f);
     }
 
@@ -169,6 +166,24 @@ namespace WhiytellyEducationSystem.Characters
         {
             base.Hear(source, position, value);
             whiy.Hear(source, position, value, true);
+        }
+
+        public override void PlayerInSight(PlayerManager player)
+        {
+            base.PlayerInSight(player);
+
+            if (whiy.FacingPlayer(player))
+                whiy.Hear(player.gameObject, player.transform.position, 127, false);
+        }
+    }
+
+    public class Whiytelly_SubState : Whiytelly_StateBase
+    {
+        public Whiytelly_StateBase state;
+
+        public Whiytelly_SubState(Whiytelly whiy, Whiytelly_StateBase state) : base(whiy)
+        {
+            this.state = state;
         }
     }
 
@@ -211,7 +226,7 @@ namespace WhiytellyEducationSystem.Characters
             base.Initialize();
             whiy.audMan.FlushQueue(true);
             whiy.audMan.PlaySingle(whiy.audStartCountdown);
-            whiy.animator.PlayAnimation("Anim_CountingStart", true, false);
+            whiy.animator.PlayAnimation("Anim_Counting", true, false);
             whiy.StartCoroutine(Countdown(10));
         }
 
@@ -220,11 +235,9 @@ namespace WhiytellyEducationSystem.Characters
             while (whiy.audMan.AnyAudioIsPlaying || Singleton<CoreGameManager>.Instance.Paused)
                 yield return null;
 
-            int count = 20;
-            if (count == 0)
-                yield break;
+            whiy.animator.PlayAnimation("Anim_CountingStart", true, false);
 
-            float interval = totalDuration / count;
+            float interval = 1.5f;
 
             foreach (SoundObject voiceline in whiy.audCountdown)
             {
@@ -240,18 +253,14 @@ namespace WhiytellyEducationSystem.Characters
                 }
             }
 
+            whiy.animator.PlayAnimation("Anim_Counting", true, false);
             whiy.audMan.PlaySingle(whiy.audEndCountdown);
 
             while (whiy.audMan.AnyAudioIsPlaying || Singleton<CoreGameManager>.Instance.Paused)
                 yield return null;
 
-            Singleton<MusicManager>.Instance.StopMidi();
-            Singleton<BaseGameManager>.Instance.BeginSpoopMode();
-            whiy.ec.SpawnNPCs();
-            whiy.ec.StartEventTimers();
-
-            if (Singleton<CoreGameManager>.Instance.currentMode == Mode.Main)
-                whiy.behaviorStateMachine.ChangeState(whiy.GetAngryState());
+            whiy.behaviorStateMachine.ChangeState(whiy.GetAngryState());
+            whiy.ActivateSpoopMode();
         }
 
         public override void Hear(GameObject source, Vector3 position, int value)
@@ -270,6 +279,7 @@ namespace WhiytellyEducationSystem.Characters
             base.Initialize();
             whiy.Navigator.Entity.SetFrozen(false);
             whiy.animator.PlayAnimation("Anim_WalkAngry", true, true);
+            whiy.UpdateSoundTarget();
         }
 
         public override void Update()
@@ -277,49 +287,63 @@ namespace WhiytellyEducationSystem.Characters
             base.Update();
 
             whiy.UpdateSlapDistance();
-            delayTimer -= Time.deltaTime * this.npc.TimeScale;
+            delayTimer -= Time.deltaTime * npc.TimeScale;
             if (delayTimer <= 0f)
             {
                 whiy.Slap();
-                delayTimer = 0.05f;
+                delayTimer = 0.1f;
             }
-
         }
 
-        public override void DoorHit(StandardDoor door)
+        public override void OnStateTriggerStay(Collider other)
         {
-            if (!door.IsOpen)
+            base.OnStateTriggerStay(other);
+
+
+            if (whiy.IsTouchingPlayer(other))
             {
-                if (this.npc.ec.CellFromPosition(this.npc.transform.position) == door.aTile)
-                {
-                    if (door.bTile.room.category != RoomCategory.Class)
-                    {
-                        whiy.FacultyDoorHit(door, door.bTile);
-                        return;
-                    }
-                }
-                else if (door.aTile.room.category != RoomCategory.Class)
-                {
-                    whiy.FacultyDoorHit(door, door.aTile);
-                    return;
-                }
+                PlayerManager component = other.GetComponent<PlayerManager>();
+
+                if (whiy.FacingPlayer(component))
+                    whiy.CaughtPlayer(component);
             }
-            door.OpenTimedWithKey(door.DefaultTime, false);
         }
 
+        public override void GoodMathMachineAnswer()
+        {
+            base.GoodMathMachineAnswer();
+            whiy.behaviorStateMachine.ChangeState(new Whiytelly_Clapping(whiy, whiy.GetAngryState() as Whiytelly_StateBase));
+        }
 
         public float delayTimer;
     }
 
-    public class Whiytelly_OnKnock : Whiytelly_StateBase
+    public class Whiytelly_Clapping : Whiytelly_SubState
     {
-        public Whiytelly_OnKnock(Whiytelly whiy) : base(whiy) { }
+        public float time = 5;
+
+        public  Whiytelly_Clapping(Whiytelly whiytelly, Whiytelly_StateBase stateBase) : base(whiytelly, stateBase)
+        {
+        }
 
         public override void Initialize()
         {
             base.Initialize();
-            //whiy.audMan.PlaySingle(whiy.audHello);
-            whiy.animator.PlayAnimation("Anim_WhiyHello", true, false);
+            whiy.animator.PlayAnimation("Anim_Clapping", true, true);
+            whiy.audMan.PlaySingle(whiy.claps);
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            time -= Time.deltaTime * whiy.TimeScale;
+
+            if (time <= 0f)
+            {
+                whiy.animator.StopAllCoroutines();
+                whiy.behaviorStateMachine.ChangeState(state);
+            }
+            
         }
     }
 }
